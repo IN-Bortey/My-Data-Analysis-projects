@@ -1,2 +1,2 @@
-# My Python Projects
-It contains my python project codes.
+# My Python and R Projects
+It contains my python and R project codes.
