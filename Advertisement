@@ -1,0 +1,76 @@
+# Loading libraries
+
+library("tidyverse")
+library("here")
+library("janitor")
+library("skimr")
+library("dplyr")
+library("Tmisc")
+library("stats")
+library("stargazer")
+library("writexl")
+library("plm")
+library("ggplot2")
+library("scales")
+
+# Loading Data
+
+advert <- read.csv(file.choose(),header=TRUE)
+
+
+# Inspecting Data
+
+head(advert)
+colnames(advert)
+skim_without_charts(advert)
+str(advert)
+
+# Checking for missing data
+
+advert %>%
+  map(~sum(is.na(.)))
+
+# Summarize data
+
+advert %>%
+  summarise(across(where(is.numeric), .fns = 
+                           list(
+                             min = min,
+                             max = max,
+                             mode = mode,
+                             mean = mean)
+                           )) %>%
+pivot_longer(everything(), names_sep = '_', names_to = c('variable','.value'))
+
+# Checking and Plotting Gender Distribution
+
+advert %>%
+  count(Gender == "Female")
+
+advert %>%
+  count(Gender == "Male")
+
+ggplot(advert)+
+  geom_bar(mapping=aes(x=Gender, fill=Gender))+
+  labs(title = "Gender Distribution")
+
+# Plotting relationship between age and spending
+
+ggplot(advert)+
+  geom_point(mapping = aes(x=Age, y = Spending, col = Gender))+
+  labs(title = "Relationship between Age and Spending")+
+  geom_text(aes(label = ), vjust = 0)
+
+# Grouping Ages and ploting the distribution
+
+# 19-28, 29-38, 39-48, 49-58, 59-68
+
+advert$AgeGroup <- as.character(cut(advert$Age,
+                                    breaks = c(-1,28,38,48,58,68),
+                                    labels = c("19-28", "29-38", "39-48", "49-58", "59-68"),
+                                    right  = TRUE))
+
+ggplot(advert)+
+  geom_bar(mapping = aes(x=AgeGroup, y=after_stat(count/sum(count)),fill=AgeGroup))+
+  scale_y_continuous(labels = percent)+
+  labs(title = "Age Distribution")
